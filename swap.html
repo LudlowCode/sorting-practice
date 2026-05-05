@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Sort the items!</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="Sortable.js"></script>
+	<script>
+		function populateList(id, numItems, parent = document.body) {
+			let listWrapper = document.createElement("div");
+			listWrapper.className = "list-wrapper";
+			let listGroup = document.createElement("div");
+			listGroup.id = id;
+			listGroup.className = "list-group";
+
+			parent.appendChild(listWrapper);
+			listWrapper.appendChild(listGroup);
+			for (let i = 0; i < numItems; i++) {
+				let item = document.createElement("div");
+				item.className = "list-group-item";
+				item.textContent = Math.floor(Math.random() * 100);
+				item.ondrag = function (event) {
+					dragging(event);
+				};
+				item.ondragend = function (event) {
+					dragend(event);
+				};
+				listGroup.appendChild(item);
+
+			}
+			setCorrectList(listGroup);
+			Sortable.create(listGroup, {
+				swap: true,
+				swapClass: "highlight",
+				selectedClass: "selected",
+				animation: 150
+			});
+			listWrapper.appendChild(document.createElement("br"));
+			let feedback = document.createElement("div");
+			feedback.id = id + "-feedback";
+			feedback.className = "feedback";
+			listWrapper.appendChild(feedback);
+
+		}
+		function setup() {
+			populateList("1", 5);
+			document.body.setAttribute("current-level", "1");
+
+		}
+		function levelUp() {
+			let currentLevel = parseInt(document.body.getAttribute("current-level"));
+			currentLevel++;
+			document.body.setAttribute("current-level", currentLevel);
+			populateList(currentLevel, 5 + currentLevel);
+		}
+
+		function setCorrectList(listGroup) {
+			let correctOrder = bubbleSort(getThisList(listGroup));
+			listGroup.setAttribute("correct-order", correctOrder.join("\n"));
+			// console.log("Correct Order:\t" + correctOrder);
+		}
+		function dragging(ev) {
+			//console.log(ev.target);
+			let previousList = getList(ev);
+			ev.target.parentElement.setAttribute("previous-list", previousList);
+			// console.log("Dragging...");
+			// console.log(previousList);
+		}
+		function indexOfArrayIn2DArray(arr, arr2D) {
+			for (let i = 0; i < arr2D.length; i++) {
+				if (arraysEqual(arr, arr2D[i])) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		function arraysEqual(arr1, arr2) {
+			if (arr1.length !== arr2.length) return false;
+			for (let i = 0; i < arr1.length; i++) {
+				if (arr1[i] !== arr2[i]) return false;
+			}
+			return true;
+		}
+		function getDistinctValues(arr) {
+			for(let i = 0; i < arr.length; i++) {
+				for(let j = i+1; j < arr.length; j++) {
+					if(arraysEqual(arr[i], arr[j])) {
+						arr.splice(j, 1);
+						j--;
+					}
+				}
+			}
+			return arr;
+		}
+		function dragend(ev) {
+			let listItem = ev.target;
+			let listGroup = listItem.parentElement;
+			//If this list's array has the previous state in position i and this state in i+ 1 then show success. 
+			let correctOrder = unflattenCorrectOrder(listGroup.getAttribute("correct-order"));
+			// console.log("\n"+correctOrder);
+			let previousList = listGroup.getAttribute("previous-list").split(",");
+			let thisList = getList(ev);
+			let currentPosition = indexOfArrayIn2DArray(thisList, correctOrder)
+			if (listItem.classList.contains("incorrect")&& currentPosition !== -1) {
+				listItem.classList.remove("incorrect");
+			}
+			if (currentPosition !== -1 &&(previousList, correctOrder[currentPosition-1]) && arraysEqual(thisList, correctOrder[currentPosition])) {
+				document.getElementById(listGroup.getAttribute("id") + "-feedback").innerHTML += "✔️";
+				listItem.classList.remove("incorrect");
+				if(arraysEqual(thisList, correctOrder[correctOrder.length - 1])) {
+					levelUp();
+				}
+			} else {
+				console.log("Current:\t" + thisList);
+				console.log(indexOfArrayIn2DArray(thisList, correctOrder));
+				console.log("Previous:\t" + previousList);
+				console.log(indexOfArrayIn2DArray(previousList, correctOrder));
+				listItem.classList.add("incorrect");
+				alert("Oh NO! Bad swap!! 😢😢");
+				document.getElementById(listGroup.getAttribute("id") + "-feedback").innerHTML += "❌";
+			
+			}
+			//console.log(getList(ev));
+		}
+		function unflattenCorrectOrder(correctOrder) {
+			let tempArray = correctOrder.split("\n");
+			for(let i = 0; i < tempArray.length; i++) {
+				tempArray[i] = tempArray[i].split(",").map(String);
+			}
+			// console.log(tempArray);
+			return tempArray;	
+		}
+		function bubbleSort(arr) {
+			try {
+				arr = arr.map(Number);
+			} catch (e) {
+				console.error("Treating array as strings as not convertable to numbers...");
+			}
+			let n = arr.length;
+			let steps = [];
+			steps.push([...arr]);
+			for (let i = 0; i < n - 1; i++) {
+				for (let j = 0; j < (n -i -1); j++) {
+					
+					if (arr[j] > arr[j + 1]) {
+						[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+					}
+					steps.push([...arr]);
+				}
+			}
+			return steps;
+		}
+		function getList(ev) {
+			// console.log(ev);
+			// console.log("Getting list...");
+			//console.log(`Doing ${ev} in ${ev.toElement.parentElement.className}${ev.toElement.parentElement.id} from ${ev.fromElement.innerHTML} to ${ev.toElement} dragging ${ev.target.innerHTML} to position ${Array.prototype.indexOf.call(ev.toElement.parentElement.childNodes, ev.toElement)}`);
+
+
+			/***
+			 * Turns the innertext of the children into an array.
+			 */
+			let result = [];
+			let wholeList = ev.currentTarget.parentElement.childNodes;
+
+			for (let item of wholeList) {
+				result.push(item.innerHTML);
+			}
+			// console.log(result);
+			return result;
+
+		}   
+		function getThisList(listGroup) {
+			// console.log(ev);
+			// console.log("Getting list...");
+			//console.log(`Doing ${ev} in ${ev.toElement.parentElement.className}${ev.toElement.parentElement.id} from ${ev.fromElement.innerHTML} to ${ev.toElement} dragging ${ev.target.innerHTML} to position ${Array.prototype.indexOf.call(ev.toElement.parentElement.childNodes, ev.toElement)}`);
+
+
+			/***
+			 * Turns the innertext of the children into an array.
+			 */
+			let result = [];
+			let wholeList = listGroup.childNodes;
+
+			for (let item of wholeList) {
+				result.push(item.innerHTML);
+			}
+			// console.log(result);
+			return result;
+
+		}   
+	</script>
+</head>
+
+<body onload="setup()">
+	<!-- <div id="list" class="list-group">
+		<div class="list-group-item">16</div>
+		<div class="list-group-item">10</div>
+		<div class="list-group-item">7</div>
+		<div class="list-group-item">17</div>
+		<div class="list-group-item">12</div>
+	</div>
+	<div id="steps" style="float:left;">Steps </div>
+	<button style="float:right;">Check pass</button>
+	<div id="bubble-sort-feedback" style="float:right;">Passes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div> -->
+	<!-- <button>Check </button> -->
+	<!-- <br><br>
+	<span></span> -->
+
+
+</body>
+
+</html>

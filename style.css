@@ -1,0 +1,56 @@
+body {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: larger;
+    background-color: rgb(0, 0, 37);
+}
+
+.list-group {
+    display: flex;
+    /* Aligns children side-by-side */
+    gap: 20px;
+    /* Creates space between items */
+    padding: 10px;
+}
+
+.incorrect {
+    background-color: #ff0000 !important;
+    font-weight: bold;
+}
+
+.list-group-item {
+    background-color: lightblue;
+    border-radius: 15px;
+    /* Rounds the corners */
+    padding: 20px;
+    flex: 1;
+    /* Makes them share space equally */
+    text-align: center;
+    user-select: none;
+}
+
+.highlight {
+    background-color: #f9c7c8 !important;
+    font-weight: bold;
+}
+
+.sortable-chosen {
+    background-color: #d1ff87af !important;
+    font-weight: bold;
+}
+
+button {
+    /* background-color: rgba(100, 136, 121, 0.667); */
+    border-radius: 1rem;
+    /* Rounds the corners */
+    padding: 0.7rem;
+    /* flex: 1; */
+
+    /* Makes them share space equally */
+    text-align: center;
+    /* user-select: none; */
+    /* float: right; */
+}
+
+button:hover {
+    background-color: rgb(123, 185, 30);
+}
