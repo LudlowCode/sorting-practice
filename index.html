@@ -105,6 +105,8 @@
 			let currentPosition = indexOfArrayIn2DArray(thisList, correctOrder)
 			if (listItem.classList.contains("incorrect")&& currentPosition !== -1) {
 				listItem.classList.remove("incorrect");
+				// listGroup.setAttribute("previous-list", thisList);
+				return;
 			}
 			if (currentPosition !== -1 &&(previousList, correctOrder[currentPosition-1]) && arraysEqual(thisList, correctOrder[currentPosition])) {
 				document.getElementById(listGroup.getAttribute("id") + "-feedback").innerHTML += "✔️";
