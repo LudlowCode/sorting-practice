@@ -37,11 +37,15 @@
 				selectedClass: "selected",
 				animation: 150
 			});
-			listWrapper.appendChild(document.createElement("br"));
+			
 			let feedback = document.createElement("div");
 			feedback.id = id + "-feedback";
 			feedback.className = "feedback";
+			feedback.textContent = "&nbsp;";
 			listWrapper.appendChild(feedback);
+			listWrapper.appendChild(document.createElement("br"));
+			listWrapper.appendChild(document.createElement("hr"));
+
 
 		}
 		function setup() {
@@ -196,7 +200,7 @@
 </head>
 
 <body onload="setup()">
-	<h1>🫧 Bubble sort the items 🫧</h1>
+	<h1>🫧 Bubble sort! 🫧</h1>
 	<!-- <div id="list" class="list-group">
 		<div class="list-group-item">16</div>
 		<div class="list-group-item">10</div>
