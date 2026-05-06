@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Bubble sort the items!</title>
+	<title>Insertion sort the items!</title>
 	<link rel="stylesheet" href="style.css">
 	<script src="Sortable.js"></script>
 	<script>
@@ -15,7 +15,7 @@
 			listGroup.id = id;
 			listGroup.className = "list-group";
 			listGroup.setAttribute("num-items", numItems);
-			listGroup.setAttribute("next-final-position", numItems-1);
+			listGroup.setAttribute("sorted-list-size", 1);
 
 
 			parent.appendChild(listWrapper);
@@ -35,13 +35,10 @@
 			}
 			setCorrectList(listGroup);
 			Sortable.create(listGroup, {
-				swap: true,
-				swapClass: "highlight",
-				selectedClass: "selected",
-				filter: '.filtered',
-				animation: 150
+				animation: 500,
+				ghostClass: 'blue-background-class'
 			});
-			
+
 			let feedback = document.createElement("div");
 			feedback.id = id + "-feedback";
 			feedback.className = "feedback";
@@ -64,7 +61,7 @@
 			populateList(currentLevel, 5 + currentLevel);
 		}
 		function setCorrectList(listGroup) {
-			let correctOrder = bubbleSort(getThisList(listGroup));
+			let correctOrder = insertionSort(getThisList(listGroup));
 			listGroup.setAttribute("correct-order", correctOrder.join("\n"));
 			// console.log("Correct Order:\t" + correctOrder);
 		}
@@ -91,9 +88,9 @@
 			return true;
 		}
 		function getDistinctValues(arr) {
-			for(let i = 0; i < arr.length; i++) {
-				for(let j = i+1; j < arr.length; j++) {
-					if(arraysEqual(arr[i], arr[j])) {
+			for (let i = 0; i < arr.length; i++) {
+				for (let j = i + 1; j < arr.length; j++) {
+					if (arraysEqual(arr[i], arr[j])) {
 						arr.splice(j, 1);
 						j--;
 					}
@@ -111,22 +108,23 @@
 			let thisList = getList(ev);
 			let listItemPosition = getPositionInList(listItem, listGroup);
 			let currentListPosition = indexOfArrayIn2DArray(thisList, correctOrder)
-			if (listItem.classList.contains("incorrect")&& currentListPosition !== -1) {
+			if (listItem.classList.contains("incorrect") && currentListPosition !== -1) {
 				listItem.classList.remove("incorrect");
 				// listGroup.setAttribute("previous-list", thisList);
 				return;
 			}
-			if (currentListPosition !== -1 &&(previousList, correctOrder[currentListPosition-1]) && arraysEqual(thisList, correctOrder[currentListPosition])) {
+			if (currentListPosition !== -1 && (previousList, correctOrder[currentListPosition - 1]) && arraysEqual(thisList, correctOrder[currentListPosition])) {
 				document.getElementById(listGroup.getAttribute("id") + "-feedback").innerHTML += "✔️";
 				listItem.classList.remove("incorrect");
-				let finalPosition = parseInt(listGroup.getAttribute("next-final-position"));
-				if (listItemPosition===finalPosition){
-					listItem.classList.add("filtered");
-					listItem.setAttribute("title", "I've bubbled up to my final position!");
-					listGroup.setAttribute("next-final-position", finalPosition - 1);
-				}
-				
-				if(arraysEqual(thisList, correctOrder[correctOrder.length - 1])) {
+				let sortedListSize = parseInt(listGroup.getAttribute("sorted-list-size"));
+				// if (listItemPosition === sortedListSize) {
+				// 	listItem.classList.add("filtered");
+				// 	// listItem.setAttribute("title", "I've bubbled up to my final position!");
+					
+				// }
+				listGroup.setAttribute("sorted-list-size", sortedListSize + 1);
+
+				if (arraysEqual(thisList, correctOrder[correctOrder.length - 1])) {
 					levelUp();
 				}
 			} else {
@@ -135,19 +133,19 @@
 				console.log("Previous:\t" + previousList);
 				console.log(indexOfArrayIn2DArray(previousList, correctOrder));
 				listItem.classList.add("incorrect");
-				alert("Oh NO! Bad swap!! 😢😢");
+				alert("Oh NO! Bad shift!! 😢😢");
 				document.getElementById(listGroup.getAttribute("id") + "-feedback").innerHTML += "❌";
-			
+
 			}
 			//console.log(getList(ev));
 		}
 		function unflattenCorrectOrder(correctOrder) {
 			let tempArray = correctOrder.split("\n");
-			for(let i = 0; i < tempArray.length; i++) {
+			for (let i = 0; i < tempArray.length; i++) {
 				tempArray[i] = tempArray[i].split(",").map(String);
 			}
 			// console.log(tempArray);
-			return tempArray;	
+			return tempArray;
 		}
 		function bubbleSort(arr) {
 			try {
@@ -159,13 +157,35 @@
 			let steps = [];
 			steps.push([...arr]);
 			for (let i = 0; i < n - 1; i++) {
-				for (let j = 0; j < (n -i -1); j++) {
-					
+				for (let j = 0; j < (n - i - 1); j++) {
+
 					if (arr[j] > arr[j + 1]) {
 						[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
 					}
 					steps.push([...arr]);
 				}
+			}
+			return steps;
+		}
+		function insertionSort(arr) {
+			try {
+				arr = arr.map(Number);
+			} catch (e) {
+				console.error("Treating array as strings as not convertable to numbers...");
+			}
+			let length = arr.length;
+			let steps = [];
+			steps.push([...arr]);
+			for (let i = 1; i < length; i++) {
+				let currentItem = arr[i];
+				let j = i - 1;
+				while (j >= 0 && arr[j] > currentItem) {
+					//Shift bigger item to the right
+					arr[j + 1] = arr[j];
+					j--;
+				}
+				arr[j + 1] = currentItem;
+				steps.push([...arr]);
 			}
 			return steps;
 		}
@@ -187,7 +207,7 @@
 			// console.log(result);
 			return result;
 
-		}   
+		}
 		function getThisList(listGroup) {
 			// console.log(ev);
 			// console.log("Getting list...");
@@ -206,7 +226,7 @@
 			// console.log(result);
 			return result;
 
-		}   
+		}
 		function getPositionInList(listItem, listGroup) {
 			let position = Array.prototype.indexOf.call(listGroup.childNodes, listItem);
 			return position;
@@ -214,9 +234,8 @@
 	</script>
 </head>
 
-<body>
-	<a href="bubble-sort.html" target="_blank" rel="noopener noreferrer"><h1>🫧Practise a Bubble sort! 🫧</h1></a>
-	<a href="insertion-sort.html" target="_blank" rel="noopener noreferrer"><h1>↙️⬅️⬅️Practise an Insertion sort!</h1></a>
+<body onload="setup()">
+	<h1>🫧 Insertion sort! 🫧</h1>
 
 
 </body>
